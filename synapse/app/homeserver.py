@@ -187,6 +187,10 @@ class SynapseHomeServer(HomeServer):
                 from synapse.rest.saml2 import SAML2Resource
 
                 resources["/_matrix/saml2"] = SAML2Resource(self)
+            elif self.get_config().oidc_enabled:
+                from synapse.rest.oidc import OIDCResource
+
+                resources["/_matrix/oidc"] = OIDCResource(self)
 
         if name == "consent":
             from synapse.rest.consent.consent_resource import ConsentResource

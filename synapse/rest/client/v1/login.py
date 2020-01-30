@@ -87,6 +87,7 @@ class LoginRestServlet(RestServlet):
         self.jwt_secret = hs.config.jwt_secret
         self.jwt_algorithm = hs.config.jwt_algorithm
         self.saml2_enabled = hs.config.saml2_enabled
+        self.oidc_enabled = hs.config.oidc_enabled
         self.cas_enabled = hs.config.cas_enabled
         self.auth_handler = self.hs.get_auth_handler()
         self.registration_handler = hs.get_registration_handler()
@@ -101,7 +102,7 @@ class LoginRestServlet(RestServlet):
         flows = []
         if self.jwt_enabled:
             flows.append({"type": LoginRestServlet.JWT_TYPE})
-        if self.saml2_enabled:
+        if self.saml2_enabled or self.oidc_enabled:
             flows.append({"type": LoginRestServlet.SSO_TYPE})
             flows.append({"type": LoginRestServlet.TOKEN_TYPE})
         if self.cas_enabled:
@@ -533,6 +534,16 @@ class SAMLRedirectServlet(BaseSSORedirectServlet):
         return self._saml_handler.handle_redirect_request(client_redirect_url)
 
 
+class OIDCRedirectServlet(BaseSSORedirectServlet):
+    PATTERNS = client_patterns("/login/sso/redirect", v1=True)
+
+    def __init__(self, hs):
+        self._oidc_handler = hs.get_oidc_handler()
+
+    def get_sso_url(self, client_redirect_url):
+        return self._oidc_handler.handle_redirect_request(client_redirect_url)
+
+
 class SSOAuthHandler(object):
     """
     Utility class for Resources and Servlets which handle the response from a SSO
@@ -618,3 +629,5 @@ def register_servlets(hs, http_server):
         CasTicketServlet(hs).register(http_server)
     elif hs.config.saml2_enabled:
         SAMLRedirectServlet(hs).register(http_server)
+    elif hs.config.oidc_enabled:
+        OIDCRedirectServlet(hs).register(http_server)

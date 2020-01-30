@@ -31,6 +31,7 @@ from synapse.config import (
     user_directory,
     voip,
     workers,
+    oidc_config
 )
 
 class ConfigError(Exception): ...
@@ -56,6 +57,7 @@ class RootConfig:
     appservice: appservice.AppServiceConfig
     key: key.KeyConfig
     saml2: saml2_config.SAML2Config
+    oidc: oidc_config.OIDCConfig
     cas: cas.CasConfig
     jwt: jwt_config.JWTConfig
     password: password.PasswordConfig
